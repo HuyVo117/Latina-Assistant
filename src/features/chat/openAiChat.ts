@@ -1,66 +1,44 @@
-import { OPENAI_ENDPOINT } from "../constants/openai";
+// @/features/chat/openAiChat.ts
+import { OPENAI_ENDPOINT } from "../constants/openai"; // Giả sử file này tồn tại
 import { Message } from "../messages/messages";
 
 export async function getChatResponseStream(
   messages: Message[],
-  apiKey: string,
-  endpoint = OPENAI_ENDPOINT
-) {
-  if (endpoint === OPENAI_ENDPOINT && !apiKey) {
-    throw new Error("Invalid API Key");
-  }
-
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${apiKey}`,
-  };
-  const res = await fetch(endpoint, {
-    headers: headers,
+  apiKey: string, // Không dùng nhưng giữ cho tương thích
+  endpoint: string // Không dùng vì đã fix url
+): Promise<string> {
+  const url = "/api/lmstudio/chat/completions"; // Proxy endpoint
+  const response = await fetch(url, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({
-      model: "gpt-3.5-turbo",
-      messages: messages,
-      stream: true,
-      max_tokens: 200,
+      model: "deepseek-r1-distill-qwen-7b",
+      messages,
+      stream: false, // Non-streaming
     }),
   });
 
-  const reader = res.body?.getReader();
-  if (res.status !== 200 || !reader) {
-    throw new Error("Something went wrong");
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
   }
 
-  const stream = new ReadableStream({
-    async start(controller: ReadableStreamDefaultController) {
-      const decoder = new TextDecoder("utf-8");
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
+  const text = await response.text();
+  if (!text) {
+    throw new Error("Empty response from server");
+  }
 
-          if (done) break;
-
-          const data = decoder.decode(value);
-          const chunks = data
-            .split("data:")
-            .filter((val) => !!val && val.trim() !== "[DONE]");
-
-          for (const chunk of chunks) {
-            const json = JSON.parse(chunk);
-            const messagePiece = json.choices[0].delta.content;
-
-            if (messagePiece) {
-              controller.enqueue(messagePiece);
-            }
-          }
-        }
-      } catch (error) {
-        controller.error(error);
-      } finally {
-        reader.releaseLock();
-        controller.close();
-      }
-    },
-  });
-
-  return stream;
+  try {
+    const data = JSON.parse(text) as { choices?: { message: { content: string } }[] };
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      throw new Error("Invalid response format");
+    }
+    const reply = data.choices[0].message.content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+    return reply;
+  } catch (e) {
+    const error = e as Error; // Ép kiểu e thành Error
+    throw new Error(`JSON parse error: ${error.message}, raw text: ${text}`);
+  }
 }

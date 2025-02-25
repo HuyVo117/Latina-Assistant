@@ -1,1 +1,1 @@
-export const OPENAI_ENDPOINT = "https://api.openai.com/v1/chat/completions";
+export const OPENAI_ENDPOINT = "http://127.0.0.1:1234/v1";

@@ -4,7 +4,7 @@ export const Meta = () => {
   const description =
     "With just a web browser, you can enjoy conversations with 3D characters using microphone, text input, and voice synthesis. You can change the character&apos;s (VRM) appearance, adjust their personality, and customize their voice.Webブラウザだけで3Dキャラクターとの会話を、マイクやテキスト入力、音声合成を用いて楽しめます。キャラクター（VRM）の変更や性格設定、音声調整もできます。";
   const imageUrl =
-    "https://raw.githubusercontent.com/hoangvu12/ChatVRM/main/images/home.png";
+    "https://www.facebook.com/VoNhatHuy117";
   return (
     <Head>
       <title>{title}</title>
