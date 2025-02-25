@@ -20,16 +20,15 @@ Each function of ChatVRM mainly uses the following technologies
 ![settings-2.png](./images/settings-2.png)
 ![settings-3.png](./images/settings-3.png)
 
-## Demo
 
-[https://chatvrm.nguyenvu.dev](https://chatvrm.nguyenvu.dev)
 
 ## Installation
 
 To run this project locally, clone or download the repository.
 
 ```bash
-git clone https://github.com/hoangvu12/ChatVRM
+git clone https://github.com/hoangvu12/ChatVRM  for Version use API from ChatGpt
+https://github.com/HuyVo117/Latina-Assistant.git for Localy use Model train
 ```
 
 Install the required dependencies.
